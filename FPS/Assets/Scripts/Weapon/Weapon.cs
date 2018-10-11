@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class Weapon : MonoBehaviour {
 
+    private Animator animator;
+
     public float range = 100f;
 
     public int bulletsPerMag = 30; //bullets pet each magazine
@@ -19,6 +21,8 @@ public class Weapon : MonoBehaviour {
 	// Use this for initialization
 	void Start () 
     {
+        animator = GetComponent<Animator>();
+
         currentBullets = bulletsPerMag;
 	}
 	
@@ -34,6 +38,14 @@ public class Weapon : MonoBehaviour {
             fireTimer += Time.deltaTime; //Add into time counter.
 	}
 
+    private void FixedUpdate() 
+    {
+        AnimatorStateInfo info = animator.GetCurrentAnimatorStateInfo(0); 
+
+        if (info.IsName("Fire"))
+            animator.SetBool("Fire", false); //reset loop with fire animation.
+    }
+
     private void Fire()
     {
         if (fireTimer < fireRate) return;
@@ -44,6 +56,9 @@ public class Weapon : MonoBehaviour {
         {
             Debug.Log(hit.transform.name + " found!");
         }
+
+        animator.CrossFadeInFixedTime("Fire", 0.01f);
+        //animator.SetBool("Fire", true);
 
         currentBullets--;
         fireTimer = 0.0f; //Reset fire timer before fire.
