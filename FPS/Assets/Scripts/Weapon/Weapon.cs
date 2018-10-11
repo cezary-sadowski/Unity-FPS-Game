@@ -6,8 +6,9 @@ public class Weapon : MonoBehaviour {
 
     public float range = 100f;
 
-    public int bulletsPerMag = 30;
-    public int bulletsLeft;
+    public int bulletsPerMag = 30; //bullets pet each magazine
+    public int bulletsLeft; //total fired bullets.
+    public int currentBullets; //current bullets in our magazine
 
     public Transform gunEnd; //the place on gun from which the missiles fly out :) muzzle!
 
@@ -18,7 +19,7 @@ public class Weapon : MonoBehaviour {
 	// Use this for initialization
 	void Start () 
     {
-		
+        currentBullets = bulletsPerMag;
 	}
 	
 	// Update is called once per frame
@@ -44,6 +45,7 @@ public class Weapon : MonoBehaviour {
             Debug.Log(hit.transform.name + " found!");
         }
 
+        currentBullets--;
         fireTimer = 0.0f; //Reset fire timer before fire.
     }
 }
