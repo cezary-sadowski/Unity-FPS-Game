@@ -4,15 +4,18 @@ using UnityEngine;
 
 public class Weapon : MonoBehaviour {
 
-    private Animator animator;
+    private Animator _Animator;
+    private AudioSource _AudioSource; //good practice to add _ before name of private field
 
     public float range = 100f;
 
     public int bulletsPerMag = 30; //bullets pet each magazine
-    public int bulletsLeft; //total fired bullets.
+    public int bulletsAll = 200; //total fired bullets.
     public int currentBullets; //current bullets in our magazine
 
     public Transform gunEnd; //the place on gun from which the missiles fly out :) muzzle!
+    public ParticleSystem gunEndFlash; //muzzle flash.
+    public AudioClip shootSound;
 
     public float fireRate = 0.25f; //250 miliseconds between shots. 
 
@@ -21,7 +24,8 @@ public class Weapon : MonoBehaviour {
 	// Use this for initialization
 	void Start () 
     {
-        animator = GetComponent<Animator>();
+        _Animator = GetComponent<Animator>();
+        _AudioSource = GetComponent<AudioSource>();
 
         currentBullets = bulletsPerMag;
 	}
@@ -31,7 +35,11 @@ public class Weapon : MonoBehaviour {
     {
         if (Input.GetButton("Fire1"))
         {
-            Fire();
+            if (currentBullets > 0)
+                Fire();
+
+            else
+                Reload();
         }
 
         if (fireTimer < fireRate)
@@ -40,15 +48,15 @@ public class Weapon : MonoBehaviour {
 
     private void FixedUpdate() 
     {
-        AnimatorStateInfo info = animator.GetCurrentAnimatorStateInfo(0); 
+        AnimatorStateInfo info = _Animator.GetCurrentAnimatorStateInfo(0); 
 
-        if (info.IsName("Fire"))
-            animator.SetBool("Fire", false); //reset loop with fire animation.
+        //if (info.IsName("Fire")) _Animator.SetBool("Fire", false); //reset loop with fire animation.
     }
 
     private void Fire()
     {
-        if (fireTimer < fireRate) return;
+        if (fireTimer < fireRate || currentBullets <= 0) 
+            return; //if this scenario - return (exit function).
 
         RaycastHit hit;
 
@@ -57,10 +65,32 @@ public class Weapon : MonoBehaviour {
             Debug.Log(hit.transform.name + " found!");
         }
 
-        animator.CrossFadeInFixedTime("Fire", 0.01f);
+        _Animator.CrossFadeInFixedTime("Fire", 0.01f); //fixed play the fire animation
         //animator.SetBool("Fire", true);
+
+        gunEndFlash.Play();
+        PlayShootSound();
 
         currentBullets--;
         fireTimer = 0.0f; //Reset fire timer before fire.
+    }
+
+    private void Reload()
+    {
+        if (bulletsAll <= 0)
+            return;
+
+        int bulletsToLoad = bulletsPerMag - currentBullets; //for exmpl: currentBullets is 24 and perMag is 30 so I have to load 6 bullets.
+
+        int bulletsToDeduct = (bulletsAll >= bulletsToLoad) ? bulletsToLoad : bulletsAll; //if it is enough bullets to load from all its ok otherwise 
+
+        bulletsAll -= bulletsToDeduct;
+        currentBullets += bulletsToDeduct;
+    }
+
+    private void PlayShootSound()
+    {
+        _AudioSource.clip = shootSound;
+        _AudioSource.Play();
     }
 }
