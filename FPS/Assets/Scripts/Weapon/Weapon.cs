@@ -44,6 +44,12 @@ public class Weapon : MonoBehaviour {
                 DoReload();
         }
 
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+            if (currentBullets < bulletsPerMag && bulletsAll > 0)
+            DoReload();
+        }
+
         if (fireTimer < fireRate)
             fireTimer += Time.deltaTime; //Add into time counter.
 	}
