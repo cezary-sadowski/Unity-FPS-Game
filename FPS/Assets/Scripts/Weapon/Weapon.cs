@@ -7,6 +7,8 @@ public class Weapon : MonoBehaviour {
     private Animator _Animator;
     private AudioSource _AudioSource; //good practice to add _ before name of private field
 
+    private bool _isReloading;
+
     public float range = 100f;
 
     public int bulletsPerMag = 30; //bullets pet each magazine
@@ -39,7 +41,7 @@ public class Weapon : MonoBehaviour {
                 Fire();
 
             else
-                Reload();
+                DoReload();
         }
 
         if (fireTimer < fireRate)
@@ -48,14 +50,16 @@ public class Weapon : MonoBehaviour {
 
     private void FixedUpdate() 
     {
-        AnimatorStateInfo info = _Animator.GetCurrentAnimatorStateInfo(0); 
+        AnimatorStateInfo info = _Animator.GetCurrentAnimatorStateInfo(0);
+
+        _isReloading = info.IsName("Reload");
 
         //if (info.IsName("Fire")) _Animator.SetBool("Fire", false); //reset loop with fire animation.
     }
 
     private void Fire()
     {
-        if (fireTimer < fireRate || currentBullets <= 0) 
+        if (fireTimer < fireRate || currentBullets <= 0 || _isReloading) 
             return; //if this scenario - return (exit function).
 
         RaycastHit hit;
@@ -75,7 +79,7 @@ public class Weapon : MonoBehaviour {
         fireTimer = 0.0f; //Reset fire timer before fire.
     }
 
-    private void Reload()
+    public void Reload()
     {
         if (bulletsAll <= 0)
             return;
@@ -86,6 +90,16 @@ public class Weapon : MonoBehaviour {
 
         bulletsAll -= bulletsToDeduct;
         currentBullets += bulletsToDeduct;
+    }
+
+    private void DoReload()
+    {
+        AnimatorStateInfo info = _Animator.GetCurrentAnimatorStateInfo(0);
+
+        if (_isReloading)
+            return;
+        
+        _Animator.CrossFadeInFixedTime("Reload", 0.01f);
     }
 
     private void PlayShootSound()
